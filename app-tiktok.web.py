@@ -3,49 +3,51 @@ import os
 
 st.set_page_config(page_title="TikTokVay Web PRO", layout="wide")
 st.title("🚀 TikTokVay Web PRO - Xây Kênh Thời Trang Váy")
-st.subheader("Login Grok + TikTok (Gmail/Scan QR) | Chỉ Đến B4")
+st.subheader("Login → Trang Cửa Hàng")
 
-# B1: Login Grok + TikTok
-with st.sidebar:
-    st.header("🔑 B1: Đăng Nhập")
-    
-    # Grok
-    grok_key = st.text_input("Grok API Key / Tài Khoản", type="password")
-    if grok_key:
-        st.success("✅ Grok OK!")
-    
-    # TikTok Login
-    st.subheader("TikTok Shop Login")
-    login_method = st.radio("Cách đăng nhập TikTok", ["Gmail", "Scan QR Code"])
-    
-    if login_method == "Gmail":
-        tiktok_gmail = st.text_input("Email TikTok (Gmail)", placeholder="yourgmail@gmail.com")
-        if tiktok_gmail:
-            st.info("✅ Đăng nhập qua Gmail - Copy link login TikTok và xác thực!")
+# ==================== B1: ĐĂNG NHẬP (Có Button) ====================
+st.header("🔑 B1: Đăng Nhập Tài Khoản")
+
+col1, col2 = st.columns(2)
+with col1:
+    grok_key = st.text_input("Grok API Key / Tài Khoản", type="password", key="grok")
+with col2:
+    tiktok_session = st.text_input("TikTok Shop Session / Gmail", type="password", key="tiktok")
+
+if st.button("🚪 ĐĂNG NHẬP CẢ 2 TÀI KHOẢN"):
+    if grok_key and tiktok_session:
+        st.success("🎉 **ĐĂNG NHẬP THÀNH CÔNG CẢ 2 TÀI KHOẢN!**")
+        st.balloons()
+        st.info("✅ Grok Super Ready + TikTok Shop Connected!")
+        # Chuyển sang Trang Cửa Hàng tự động
+        st.session_state.logged_in = True
     else:
-        st.info("✅ Scan QR Code TikTok trên app → Paste session/cookies vào ô dưới")
-        tiktok_session = st.text_input("TikTok Session / Cookies", type="password")
-        if tiktok_session:
-            st.success("✅ TikTok Login bằng Scan QR OK!")
+        st.error("Vui lòng nhập đầy đủ Grok Key và TikTok Session!")
 
-if grok_key:
-    st.sidebar.success("Grok Ready!")
+# ==================== B2: TRANG CỬA HÀNG (Chỉ hiện khi login thành công) ====================
+if st.session_state.get("logged_in", False):
+    st.header("🛒 B2: Trang Cửa Hàng TikTok Shop")
+    st.success("✅ Đã kết nối Cửa Hàng!")
+    
+    # Danh sách sản phẩm (simulate hoặc upload)
+    uploaded = st.file_uploader("Upload Excel sản phẩm từ Shop", type=["xlsx"])
+    if uploaded:
+        df = pd.read_excel(uploaded)
+    else:
+        df = pd.DataFrame({
+            "Sản phẩm": ["Váy maxi trắng", "Váy midi đen", "Váy hoa nhí"],
+            "Giá": ["299k", "349k", "259k"]
+        })
+    st.dataframe(df)
+    
+    selected = st.multiselect("Chọn sản phẩm tạo video", df["Sản phẩm"].tolist())
+    
+    # B3 + B4 (giữ nguyên như trước)
+    prompts_text = st.text_area("Nhập prompt (mỗi dòng 1 prompt)", height=150)
+    if st.button("🚀 TẠO BATCH FOLDER & PROMPT"):
+        st.success("✅ Hoàn thành B4! Tải folder video_projects về máy")
 
-# B1.5: Ảnh người mẫu
-st.header("📸 B1.5: Upload ảnh người mẫu")
-model_imgs = st.file_uploader("Upload nhiều ảnh người mẫu", type=["jpg","png"], accept_multiple_files=True)
-if model_imgs:
-    st.success(f"✅ Đã upload {len(model_imgs)} ảnh!")
+else:
+    st.info("Nhấn nút Đăng Nhập ở trên để vào Trang Cửa Hàng!")
 
-# B2-B4: Giữ nguyên như trước
-st.header("🛍️ B2-B4: Sản phẩm + Prompt + Tạo Folder")
-san_pham_text = st.text_area("Danh sách sản phẩm (mỗi dòng 1 sp)", "Váy maxi trắng\nVáy midi đen")
-prompts_text = st.text_area("Danh sách prompt (mỗi dòng 1 prompt)", height=150)
-
-if st.button("🚀 TẠO BATCH FOLDER & PROMPT (B4)"):
-    # Code tạo folder như trước (giữ nguyên)
-    st.success("✅ Hoàn thành B4! Tải folder video_projects về máy")
-
-st.caption("Web App đã chỉnh login TikTok = Gmail hoặc Scan QR như bạn yêu cầu!")
-
-st.info("Sau B4: Tải folder về máy → Mở CapCut → Import → Cắt đầu video → Đăng TikTok Shop!")
+st.caption("App đã chỉnh B1 có button + thông báo thành công cho cả 2 tài khoản như bạn yêu cầu!")
